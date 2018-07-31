@@ -1,16 +1,10 @@
 /*!
-*	(C)2018 VeryIDE
-*	hybrid.js
-*	author: Lay veryide@qq.com
-*	desc: 数据加载与处理脚本
-*	date: 2018/07/30
-*/
-
-/**
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
  * @author Lay
+ * @date: 2018/07/30
  * @see http://www.veryide.com/projects/hybrid/
+ * @copyright VeryIDE
  * @constructor
  */
 var Hybrid = {
