@@ -1,0 +1,98 @@
+
+
+/* Vue 模板 */
+[v-cloak] {
+  display: none;
+}
+
+/*****************************/
+
+/* 页面消息 */
+#toast{ display: inline-block; margin: 0 auto; padding: 9px 50px; box-shadow: 0 0 0 6px rgba(0,0,0,0.4); white-space: nowrap; font-size: 18px; line-height: 24px; background: #f9fbd4; position:fixed; z-index:99; top:-80px; min-width:100px; transition:0.3s all; transform: translateX(-50%); }
+	#toast.default{ top:0; }
+	#toast.success{ top:0; }
+	#toast.invalid{ top:0; }
+
+/* 上传动画 */
+@-webkit-keyframes spin {
+	from { -webkit-transform: rotate(0deg);	}
+	to { -webkit-transform: rotate(360deg);	}
+}
+
+/* 原生上传 */
+#preview{ overflow: hidden; }
+	
+	#preview .object{ margin: 10px 10px 10px 0; float:left; border:#CAC9C9 solid 1px; background:#FFF; border-radius:5px; box-sizing:border-box; width:140px; height:140px; padding:5px; overflow:hidden; text-align: center; background-size: cover; background-position:center center; }
+	
+		#preview .object img{ height:100% }
+		#preview .object del{
+			background:#F55D5D; border:#FFF solid 1px;  color:#FFF; position: absolute; width: 20px; height: 20px; text-align: center; border-radius: 50%; margin: -10px; 
+			font-family:Helvetica, sans-serif; font-style:normal; line-height: 20px; display:none; font-size: 20px; cursor:pointer; text-decoration: none;
+		}
+		#preview .object:hover del{ display:block; }		
+		#preview .object var{ display: block; font-size:40px; line-height:130px; font-style: normal; color:#AFAFAF; }
+		#preview .object var.spin{ -webkit-animation-name: spin; -webkit-animation-duration: 1000ms; -webkit-animation-iteration-count: infinite;-webkit-animation-timing-function: linear; }
+		
+	#preview .handle{ position: relative; background:transparent; }
+		#preview .handle.activity, #preview .handle:hover{ border:#96C4A1 solid 1px; }
+		#preview .handle.activity var, #preview .handle:hover var{ color:#96C4A1; }
+		#preview .handle input{ display: block; width: 100%; height: 100%; opacity: 0; cursor: pointer; position: absolute; top: 0; left: 0; z-index: 99; }
+		
+/* 首页 */
+h1 em{ font-style: normal; text-align: center; -webkit-animation: animat 2s ease-in-out; position: absolute; width: 100%; display: block; font-size: 40px; color: red; margin:0 -15px; opacity: 0; }
+h1 em.sub{ color:green; }
+@-webkit-keyframes animat{
+	from {opacity:1; top: 50px;}
+	to {opacity:0; top: -30px;}
+}
+
+/* 排序 */
+.table th{}
+	.table th[data-sort-field]{ color: #039; text-decoration: underline; cursor:pointer; padding-right: 20px;  background-position: right 8px center; background-repeat: no-repeat; }
+	.table th[data-sort-field].asc{ background-image:url(data:image/gif;base64,R0lGODlhCAAHAKIAAAAAAP///+zp2Kyomf///wAAAAAAAAAAACH5BAEAAAIALAAAAAAIAAcAAAMSKDqhPqw9JQWkcjjRrgtBBI4JADs=);}
+	.table th[data-sort-field].desc{ background-image:url(data:image/gif;base64,R0lGODlhCAAHAKIAAAAAAP///+zp2Kyomf///wAAAAAAAAAAACH5BAEAAAIALAAAAAAIAAcAAAMROLosLiGI8aBTLj5q99DV9yQAOw==);}
+	
+
+/* 上传组件 */
+.upload{ list-style: none; font-size:14px; margin:0; padding:0; overflow: hidden; }
+
+	/* 图片模式下的上传按钮 */
+	input[type=file][model=pics]{
+		float: left; position: absolute; width: 140px!important; height: 140px!important;	
+		opacity:0; margin:5px 0; box-sizing:border-box; cursor:pointer;
+	}
+
+	.upload[model=pics]:before{ 
+		content:'+'; font-size:100px; height:140px; width:140px;  box-sizing:border-box;
+		text-align:center; border:#CAC9C9 solid 1px; border-radius:3px; display: block;
+		line-height: 140px; float:left; margin:5px 10px 5px 0; z-index:99; color:#CCC;
+	}
+	
+	/* 多图模式 */
+	.upload[model=pics] li{ margin:5px 10px 5px 0; float:left; border:#CAC9C9 solid 1px; border-radius:3px; box-sizing:border-box; width:140px; height:140px; overflow:hidden; text-align: center; background:#FFF; background-size: cover; background-position:center center; }
+		.upload[model=pics] li ins{ display:none; }
+		.upload[model=pics] li var{ display:none; }
+		.upload[model=pics] li a{ display:block; width:100%; height:100%; }
+		.upload[model=pics] li img{ height:100%; display:block; }
+		.upload[model=pics] li del{
+			background:#F55D5D; border:#FFF solid 1px;  color:#FFF; position: absolute; width: 20px; height: 20px; text-align: center; border-radius: 50%; margin: -12px; 
+			font-family:Helvetica, sans-serif; font-style:normal; line-height: 20px; display:none; font-size: 20px; cursor:pointer; text-decoration: none;
+		}
+		.upload[model=pics] li:hover del{ display:block; }
+	
+	/* 单图模式 */
+	.upload[model=pics][multi='1'] li{ width: auto; }
+		.upload[model=pics][multi='1'] li img{}
+
+	/* 列表模式 */
+	.upload[model=list] li{ padding:10px; border-top:#EEE solid 1px; overflow: hidden; line-height: 18px; }
+		.upload[model=list] li ins{ float:left;  }
+		.upload[model=list] li var{ background:#BBB; color:#FFF; padding:2px 5px; font-size:10px; float: left; margin-right:15px; font-family: "Lucida Console", Monaco, monospace; display:block!important; line-height: 12px; }
+		.upload[model=list] li del{ float:right; cursor:pointer; color:#999; font-size:20px; font-family: "Lucida Console", Monaco, monospace; text-decoration: none; }
+		.upload[model=list] li del:hover{ color:red; }
+
+	/* 数量上限 */
+	input[type=file][limit=full]{ display:none;	}
+	
+	.upload[model=pics][limit=full]:before{ display:none; }
+
