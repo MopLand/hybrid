@@ -3,7 +3,7 @@
 *	typhon.js
 *	author: Lay veryide@qq.com
 *	desc: App JavaScript Bridge
-*	date: 2018/05/08
+*	date: 2018/08/04
 */
 ;(function( win, doc ){
 
@@ -102,66 +102,71 @@
 	}
 
 	////////////////////
+	
+	//混合模式
+	if( /Typhon/.test( navigator.userAgent ) ){
 
-	//处理请求
-	$( document ).live( 'click', '*[data-typhon]', function( idx, e ){
+		//处理请求
+		$( document ).live( 'click', '*[data-typhon]', function( idx, e ){
 
-		$.Event( e ).stop();
+			$.Event( e ).stop();
 
-		var act = this.getAttribute('data-typhon');
+			var act = this.getAttribute('data-typhon');
 
-		if( typeof App != 'undefined' && typeof App[act] != 'undefined' ){
+			if( typeof App != 'undefined' && typeof App[act] != 'undefined' ){
 
-			//收集参数
-			var attrs = {};
-			for( var i = 0; i < this.attributes.length; i ++ ){
+				//收集参数
+				var attrs = {};
+				for( var i = 0; i < this.attributes.length; i ++ ){
 
-				var key = this.attributes[i].name;
-				var pos = key.indexOf('data-typhon-');
+					var key = this.attributes[i].name;
+					var pos = key.indexOf('data-typhon-');
 
-				if( pos > -1 ){
-					var idx = key.substr( 12 );
-					attrs[ idx ] = this.attributes[i].value;
-				}				
-			}
-
-			/////////////////////////////
-
-			//链接属性
-			if( this.hasAttribute('href') ){
-				attrs['href'] = this.href;
-			}
-
-			//图片方法
-			if( act == 'picture' ){
-
-				attrs['pics'] = [];
-
-				var pics = document.querySelectorAll('[data-typhon=picture]');				
-
-				for( var i = 0; i < pics.length; i++ ){
-					attrs['pics'].push( pics[i].href );
+					if( pos > -1 ){
+						var idx = key.substr( 12 );
+						attrs[ idx ] = this.attributes[i].value;
+					}				
 				}
 
+				/////////////////////////////
+
+				//链接属性
+				if( this.hasAttribute('href') ){
+					attrs['href'] = this.href;
+				}
+
+				//图片方法
+				if( act == 'picture' ){
+
+					attrs['pics'] = [];
+
+					var pics = document.querySelectorAll('[data-typhon=picture]');				
+
+					for( var i = 0; i < pics.length; i++ ){
+						attrs['pics'].push( pics[i].href );
+					}
+
+				}
+
+				/////////////////////////////
+
+				//调用方法
+				var result = App[act]( JSON.stringify( attrs ) );
+
+				//调试日志
+				console.log( 'App.' + act, attrs );
+				
+				//返回结果			
+				if( result ){
+					console.log( 'Result', result );			
+				}
+
+			}else{
+				console.error( 'App.' + act + ' is not defined' );
 			}
 
-			/////////////////////////////
-
-			//调用方法
-			var result = App[act]( JSON.stringify( attrs ) );
-
-			//调试日志
-			console.log( 'App.' + act, attrs );
-			
-			//返回结果			
-			if( result ){
-				console.log( 'Result', result );			
-			}
-
-		}else{
-			console.error( 'App.' + act + ' is not defined' );
-		}
-
-	});
+		});
+	
+	}
 
 })( window, document, undefined );
