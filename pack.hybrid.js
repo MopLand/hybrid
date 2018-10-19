@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2018/07/30
+ * @date: 2018/10/08
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -28,6 +28,9 @@ var Hybrid = {
 
 		//阿里妈妈PID
 		mapid : '',
+
+		//谷歌统计ID
+		google : '',
 
 		//附件目录
 		attach : '/attach/',
@@ -364,8 +367,9 @@ var Hybrid = {
 						success : function( response ){
 
 							var data = JSON.parse( response );
+							var status = typeof data['status'] != 'undefined' ? data['status'] : data['return'];
 							
-							if( data['return'] == 0 ){
+							if( status == 0 ){
 
 								stg && R( stg ).value( data.file );
 								prv && R( prv ).attr( 'src', data.file );
@@ -373,7 +377,7 @@ var Hybrid = {
 								//R.toast( 'success', '上传完成：'+ data.file, {'time': 1, 'unique': 'toast'});
 
 							}else{
-								R.toast( 'invalid', '上传失败：'+ data['return'], {'time': 3, 'unique': 'toast'});
+								R.toast( 'invalid', '上传失败：'+ status, {'time': 3, 'unique': 'toast'});
 							}
 							
 							//处理数据
@@ -908,9 +912,9 @@ var Hybrid = {
 			}
 
 			//消息提示
-			if( data['return'] < 0 ){
+			if( data['status'] < 0 ){
 
-				var msg = Hybrid.config.debug ? data['return'] + ' : ' + data['result'] : data['result'];
+				var msg = Hybrid.config.debug ? data['status'] + ' : ' + data['result'] : data['result'];
 
 				R.toast( 'invalid', msg, {'time':time, 'unique':'toast'} );
 
@@ -954,7 +958,7 @@ var Hybrid = {
 		*/
 		fill : function( data, form ){
 
-			if( form.getAttribute('config') && data['return'] > 0 ){
+			if( form.getAttribute('config') && data['status'] > 0 ){
 
 				var conf = JSON.parse( form.getAttribute('config') );
 				var mode = conf.mode ? conf.mode : 'afterbegin';
@@ -963,7 +967,7 @@ var Hybrid = {
 				var url = conf.url;
 
 				//填充至容器首				
-				R.jsonp( Hybrid.AjaxUrl( url.replace('?', data['return'] ) ), function( data ){
+				R.jsonp( Hybrid.AjaxUrl( url.replace('?', data['status'] ) ), function( data ){
 					wrap.adjacent( mode, R.template( tpl, { 'prev': null, 'item' : data['result'] }) );
 				});
 
@@ -1352,7 +1356,7 @@ var Hybrid = {
 						props: ['prev','next','nums','numbers','current','pagenum'],
 						
 						// 页码按钮
-						template: '<div><a class="prev" v-if="prev" v-on:click="paging(-1)" v-bind:class="{disabled : this.current == 1}">上一页</a><a class="nums" v-for="n in numbers" v-if="nums" v-on:click="paging(n, true)" v-bind:class="{ active : current == n }">{{n}}</a><a class="next" v-if="next" v-on:click="paging(1)" v-bind:class="{disabled : this.current == this.pagenum}">下一页</a></div>',
+						template: '<div><a class="prev" v-if="prev" v-on:click="paging(-1)" v-bind:disabled="this.current == 1">上一页</a><a class="nums" v-for="n in numbers" v-if="nums" v-on:click="paging(n, true)" v-bind:class="{ active : current == n }">{{n}}</a><a class="next" v-if="next" v-on:click="paging(1)" v-bind:disabled="this.current == this.pagenum">下一页</a></div>',
 						
 						// 定义方法
 						methods: {
@@ -1479,12 +1483,17 @@ var Hybrid = {
 					R.jsonp( Hybrid.AjaxUrl( source ), opt, function( data ){
 
 						App.loading = false;
+
+						//数据格式兼容
+						if( typeof data['status'] == 'undefined' ){
+							data['status'] = data['return'];
+						}
 						
 						//处理通用数据
 						Hybrid.Request.done( data, self );
 
 						//处理特殊数据
-						if( data['return'] >= 0 && data['result'] ){
+						if( data['status'] >= 0 && data['result'] ){
 
 							//更新数据
 							Hybrid.variate( flag, App.object, data['result'], padding );
@@ -1508,7 +1517,9 @@ var Hybrid = {
 							}
 							
 							//触发事件
-							R( window ).event('scroll');
+							window.setTimeout( function(){
+								R( window ).event('scroll');
+							}, 50 );							
 							
 						}
 
@@ -1751,24 +1762,45 @@ var Hybrid = {
 
 		/////////////////////
 
+		//Debug
+		if( Hybrid.config.debug ){
+			R.assets( '//cdn.staticfile.org/vConsole/3.2.0/vconsole.min.js', function(){
+				var vc = new VConsole();
+			} );
+		}
+
 		//阿里妈妈，淘点金PID
-		if( mapid = Hybrid.config.mapid ){
+		if( mm = Hybrid.config.mapid ){
 			var s = doc.createElement('script'), h = doc.getElementsByTagName('head')[0];
-			if (!win.alimamatk_show) {
 				s.charset = 'gbk';
 				s.async = true;
 				s.src = 'http://a.alimama.cn/tkapi.js';
 				h.insertBefore(s, h.firstChild);
-			};
-			win.alimamatk_onload = win.alimamatk_onload || [];
-			win.alimamatk_onload.push( {  pid: mapid,  appkey: '',  unid: '',  type: 'click' } );
+
+			win.alimamatk_onload = [ {  pid: mm,  appkey: '',  unid: '',  type: 'click' } ];
 		}
 
 		//百度统计，站点ID
-		if( baidu = Hybrid.config.baidu ){
-			var hm = doc.createElement('script'), s = doc.getElementsByTagName("script")[0];
-			hm.src = 'https://hm.baidu.com/hm.js?' + baidu;
-			s.parentNode.insertBefore(hm, s);
+		if( bd = Hybrid.config.baidu ){
+			var s = doc.createElement('script'), h = doc.getElementsByTagName('head')[0];
+				s.async = true;
+				s.src = 'https://hm.baidu.com/hm.js?' + bd;
+			h.insertBefore(s, h.firstChild);
+		}
+
+		//谷歌统计，站点ID
+		if( ga = Hybrid.config.google ){
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', ga]);
+			_gaq.push(['_trackPageview']);
+
+			var ga = document.createElement('script');
+				ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			
+			var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
 		}
 
 		/////////////////////
@@ -1779,7 +1811,8 @@ var Hybrid = {
 		}
 
 		//图片延迟加载
-		R.reader( R.lazy );
+		//R.reader( R.lazy );
+		R.lazy();
 
 	}
 
