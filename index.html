@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<title>Hybrid.js - 基于 Vue 的前端混合框架</title>
+	<meta name="renderer" content="webkit">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="//cdn.staticfile.org/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+	<script src="//public.zhfile.com/js/ray.js"></script>
+	<script src="pack.hybrid.js"></script>
+</head>
+
+<script>
+
+/*
+	方法一
+	仅扩展数据
+	保存在 option 对象中
+*/
+var option = {
+	sites : {"taobao":"\u6dd8\u5b9d","tmall":"\u5929\u732b"}};
+
+/*
+	方法二
+	扩展数据和方法
+	保存在 vue 实例中
+*/
+var extend = {
+	data : {
+		option : {
+			sites : {"taobao":"\u6dd8\u5b9d","tmall":"\u5929\u732b"}		}
+	},
+	methods : {
+		test: function(){
+			alert( this.pagenum );
+			//<a v-on:click="test()">Test!</a>
+		}
+	},
+	mounted : function(){
+		console.log('mounted');
+	}
+};
+
+</script>
+</head>
+
+<body>
+
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/">在线实用小工具</a></li>
+			<li class="breadcrumb-item active" aria-current="page">Hybrid.js</li>
+		</ol>
+	</nav>
+
+	<div class="container" id="app">
+
+		<blockquote class="blockquote">基本示例</blockquote>
+
+		<div class="dialog" id="menu" typhon="">
+			<a class="cancel" href="#">&times;</a>
+			<div class="screen">
+			<fragment type="template" flag="tags" cache="true" source="/tags/fetch_tags" listen=".open" event="click" v-cloak>
+				<a href="/sales" v-bind:class="{ active : '' == '' }">全部</a>
+				<a v-for="(k, v) in object.tags" v-bind:href="'/sales?tags=' + k.tags" v-bind:class="{ active : k.tags == '' }">{{k.tags}}</a>
+			</fragment>
+			</div>
+		</div>
+
+		<blockquote class="blockquote">基本示例</blockquote>
+
+		<script>
+		var option = {
+			time : 1540015715,
+			rand : '21e24fae7c1a03a2'
+		}
+		</script>
+
+		<div class="activity">
+			
+			<fragment type="template" flag="result" cache="true" source="/detail/index?id=577178864426">
+				<div class="thumb" v-if="object.result">
+					<a v-bind:href="object.result.promo_merge" target="_blank"><img v-bind:src="object.result.goods_thumb" /></a>
+				</div>
+
+				<div class="entry" v-if="object.result">
+					<div class="title">
+						<strong class="source" v-bind:site="object.result.attr_site"></strong> {{object.result.goods_name}}
+					</div>
+					<div class="price">
+						&yen; <strong>{{object.result.attr_price}}</strong> <del v-if="object.result.attr_price != object.result.attr_prime">{{object.result.attr_prime}}</del>
+					</div>
+					<div class="state">
+						近30天销售 {{object.result.sales_month}} 件，剩余 {{object.result.coupon_surplus}} 张券
+					</div>
+					<div class="state">
+						{{object.result.coupon_explain}}，有效期：{{object.result.coupon_final}}
+					</div>
+					<div class="handle">
+						<a class="button merge" v-bind:href="object.result.promo_merge" target="_blank">立即购买</a>
+						<a class="button goods" clipboard data-clipboard-target=".activity .entry">复制内容</a>					
+					</div>
+				</div>
+			</fragment>
+			
+		</div>
+
+		<blockquote class="blockquote">Ajax 处理</blockquote>
+
+		<div class="jumbotron">
+			<a data-type="ajax" data-message="我是提示信息">提示信息</a>
+		</div>
+
+		<div class="jumbotron">
+			<a data-type="ajax" data-href="/debug/delete" data-confirm="确定要这样吗？">确定操作</a>
+		</div>
+
+		<div class="jumbotron">
+			<a data-type="ajax" data-href="/debug/update" data-variable="object.result">更新变量</a>
+		</div>
+
+		<div class="jumbotron">
+			<a data-type="ajax" data-href="/debug/update" data-callback="console.log">处理回调</a>
+		</div>
+
+		<div class="headline">
+			<a data-type="ajax" data-href="/debug/update/a" data-caching="true" data-variable="object.newlook" v-bind:class="{ 'active' : object.newlook && object.newlook.model == 'a' }" data-execute="click">选项卡 A</a>
+			<a data-type="ajax" data-href="/debug/update/b" data-caching="true" data-variable="object.newlook" v-bind:class="{ 'active' : object.newlook && object.newlook.model == 'b' }">选项卡 B</a>
+		</div>
+
+		<div class="jumbotron">
+
+			<div class="element" v-if="object.newlook">
+				<a v-bind:href="object.newlook.promo_merge" target="_blank"><img v-bind:src="resized( object.newlook.goods_thumb, 200 )" /></a>
+			</div>
+			
+		</div>
+
+		<blockquote class="blockquote">表单提交</blockquote>
+
+		<div class="jumbotron">
+
+			<form method="post" target="ajax" action="/debug/submit">
+				
+				<div class="element">
+					<input type="text" placeholder="请填写名称" name="u" data-valid-name="名称" data-valid-empty="yes" />
+					<input type="text" placeholder="请填写手机号码" name="p" data-valid-name="号码" data-valid-mobile="yes" />
+					<input type="text" placeholder="请填写链接地址" name="l" data-type="ajax" data-href="/debug/checkin?url=" />
+					<button type="submit">立即提交</button>
+				</div>
+				
+			</form>
+			
+		</div>
+
+		<blockquote class="blockquote">延迟加载 5s</blockquote>
+
+		<div class="jumbotron">
+			<fragment type="template" flag="jumbotron" cache="true" source="/detail/detail?id=577178864426" lazy="5">
+				<div v-if="object.detail && object.detail.detail">最后更新：{{object.detail.timeline}}</div>
+			</fragment>
+		</div>
+
+		<blockquote class="blockquote">手动加载 <a class="display">点一下</a></blockquote>
+
+		<div class="jumbotron">
+			<fragment type="template" flag="display" source="/debug/timer" listen=".display" event="click">
+				<div v-if="object.display">远程时间：{{object.display.time}}</div>
+			</fragment>
+		</div>
+
+		<blockquote class="blockquote">自动刷新 10s</blockquote>
+
+		<div class="related">
+			<fragment type="template" flag="reload" cache="true" source="/detail/related?id=577178864426" lazy="5" reload="10">
+				<div class="item" v-if="object.reload" v-for="(k, v) in object.reload">
+					<div class="thumb">
+						<a v-bind:href="'detail?id=' + k.goods_id" target="_blank"><img v-bind:src="resized( k.goods_thumb, 300 )" /></a>
+					</div>
+					<div class="title">
+						<a v-bind:href="'detail?id=' + k.goods_id" target="_blank">{{k.goods_name}}</a>
+					</div>
+					<div class="price">
+						&yen; <strong>{{k.attr_price}}</strong> <del v-if="k.attr_price != k.attr_prime">{{k.attr_prime}}</del>
+					</div>
+					<div class="attrs">
+						<strong class="source" v-bind:site="k.attr_site">{{k.attr_site}}</strong>
+						<strong class="sales">已售{{k.sales_month}}</strong>
+					</div>
+				</div>
+			</fragment>
+		</div>
+
+		<blockquote class="blockquote">手动刷新 <a class="refresh">换一换</a></blockquote>
+
+		<div class="related">
+			<fragment type="template" flag="manual" source="/detail/related?id=577178864426" lazy="5" listen=".refresh" event="click" initial="true">
+				<div class="item" v-if="object.manual" v-for="(k, v) in object.manual">
+					<div class="thumb">
+						<a v-bind:href="'detail?id=' + k.goods_id" target="_blank"><img v-bind:src="resized( k.goods_thumb, 300 )" /></a>
+					</div>
+					<div class="title">
+						<a v-bind:href="'detail?id=' + k.goods_id" target="_blank">{{k.goods_name}}</a>
+					</div>
+					<div class="price" data-type="ajax" data-href="/debug/change" v-bind:data-variable="'object.manual.'+ v +'.attr_price'">
+						&yen; <strong>{{k.attr_price}}</strong> <del v-if="k.attr_price != k.attr_prime">{{k.attr_prime}}</del>
+					</div>
+					<div class="attrs">
+						<strong class="source" v-bind:site="k.attr_site">{{k.attr_site}}</strong>
+						<strong class="sales">已售{{k.sales_month}}</strong>
+					</div>
+				</div>
+			</fragment>
+		</div>
+
+		<blockquote class="blockquote">分页处理</blockquote>
+
+		<div class="wrap">
+
+			<div class="listing">
+				<fragment type="template" flag="multi" cache="true" source="/debug/index?id=577178864426&page=1" listen=".paging a" event="" paging="true" padding="" history="" v-cloak>
+					<div class="item" v-for="(k, v) in object.multi">
+						<div class="index" v-if="location.pathname.indexOf('/trend') > -1">{{v + 1}}</div>
+						<div class="thumb" v-bind:photo="k.attr_comment">
+							<a v-bind:href="'/detail?id=' + k.goods_id" target="_blank" data-typhon="link"><img v-bind:raw="resized( k.goods_thumb, 250 )" /></a>
+						</div>
+						<div class="title">
+							<a v-bind:href="'/detail?id=' + k.goods_id" target="_blank" data-typhon="link">{{k.goods_name}}</a>
+						</div>
+						<div class="price">
+							&yen; <strong>{{k.attr_price}}</strong> <a v-bind:href="k.promo_merge" target="_blank">券 &yen; {{(k.attr_prime - k.attr_price).toFixed(0)}}</a>
+						</div>
+						<div class="ratio">
+							<div class="handle" v-bind:style="{ width: ( 1 - k.coupon_surplus / k.coupon_total ) * 100 + '%' }"></div>
+						</div>
+						<div class="attrs">
+							<strong class="source" v-bind:site="k.attr_site">{{option.sites[k.attr_site]}}</strong>
+							<strong class="sales">原价 {{k.attr_prime}}</strong>
+							<strong class="sales" v-if="k.sales_month > 0">已售 {{k.sales_month}}</strong>
+						</div>
+					</div>
+					<div class="notfound" v-if="!object.multi || object.multi.length == 0">
+						没有找到相关商品
+					</div>
+				</fragment>
+			</div>
+
+		</div>
+
+		<div class="paging">
+			<paging next="true" :numbers="numbers" :current="current" :pagenum="pagenum" v-on:paging="paging"></paging>
+		</div>
+
+		<div class="paging">
+			<paging prev="true" next="true" :numbers="numbers" :current="current" :pagenum="pagenum" v-on:paging="paging"></paging>
+		</div>
+
+		<div class="paging">
+			<paging prev="true" next="true" nums="true" :numbers="numbers" :current="current" :pagenum="pagenum" v-on:paging="paging"></paging>
+		</div>
+
+		<blockquote class="blockquote">滚动加载</blockquote>
+
+		<div class="wrap">
+
+			<div class="listing">
+				<fragment type="template" flag="scroll" cache="true" source="/debug/index?id=577178864426&page=1" listen="window" event="scroll" paging="true" padding="true" history="" v-cloak>
+					<div class="item" v-for="(k, v) in object.scroll">
+						<div class="index" v-if="location.pathname.indexOf('/trend') > -1">{{v + 1}}</div>
+						<div class="thumb" v-bind:photo="k.attr_comment">
+							<a v-bind:href="'/detail?id=' + k.goods_id" target="_blank" data-typhon="link"><img v-bind:raw="resized( k.goods_thumb, 250 )" /></a>
+						</div>
+						<div class="title">
+							<a v-bind:href="'/detail?id=' + k.goods_id" target="_blank" data-typhon="link">{{k.goods_name}}</a>
+						</div>
+						<div class="price">
+							&yen; <strong>{{k.attr_price}}</strong> <a v-bind:href="k.promo_merge" target="_blank">券 &yen; {{(k.attr_prime - k.attr_price).toFixed(0)}}</a>
+						</div>
+						<div class="ratio">
+							<div class="handle" v-bind:style="{ width: ( 1 - k.coupon_surplus / k.coupon_total ) * 100 + '%' }"></div>
+						</div>
+						<div class="attrs">
+							<strong class="source" v-bind:site="k.attr_site">{{option.sites[k.attr_site]}}</strong>
+							<strong class="sales">原价 {{k.attr_prime}}</strong>
+							<strong class="sales" v-if="k.sales_month > 0">已售 {{k.sales_month}}</strong>
+						</div>
+					</div>
+					<div class="notfound" v-if="!object.scroll || object.scroll.length == 0">
+						没有找到相关商品
+					</div>
+				</fragment>
+			</div>
+
+		</div>
+
+	</div>
+
+	<hr />
+
+	<footer>
+		<p class="text-center"><i>Powered by <a href="http://www.veryide.com/" target="_blank">VeryIDE</a></i></p>
+	</footer>
+
+	<script src="/project/app.js"></script>
+
+</body>
+</html>
