@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2018/10/08
+ * @date: 2018/10/25
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -191,8 +191,30 @@ var Hybrid = {
 	* @return {String} 图片地址
 	*/
 	thumb : function ( file, size ){
-		size = ( size instanceof Array ) ? size[0] + 'x' + size[1] : 'thumb';
-		return file ? Hybrid.substr_replace( file, '!'+ size +'.', file.lastIndexOf('.'), 1 ) : '';
+
+		if( !file ){
+			return '';
+		}
+
+		var mark = file.indexOf('!!') > -1;
+
+		if( mark && !isNaN( size ) ){
+			size = [ size, size ];
+		}
+	
+		if( size instanceof Array ){
+			size = size.join('x');
+		}else{
+			size = size ? size : 'thumb';
+		}
+	
+		if( mark ){
+			file = file.replace(/_(\d+?)x(\d+?)\.jpg/, '');
+			return file + '_' + size + '.jpg';
+		}else{
+			return Hybrid.substr_replace( file, '!'+ size +'.', file.lastIndexOf('.'), 1 );
+		}
+	
 	},
 
 	/*
@@ -1217,13 +1239,12 @@ var Hybrid = {
 
 					/*
 					* @desc	调整图片尺寸
-					* @param {String} imgsrc 图片地址
+					* @param {String} field 图片地址
 					* @param {Number} sized 尺寸
 					* @return {String} 新地址
 					*/
-					resized: function( imgsrc, sized ){
-						imgsrc = imgsrc.replace(/_(\d+?)x(\d+?)\.jpg/, '');
-						return imgsrc + '_' + sized + 'x' + sized + '.jpg';
+					resized: function( field, sized ){
+						return Hybrid.thumb( field, sized );
 					},
 
 					/*
