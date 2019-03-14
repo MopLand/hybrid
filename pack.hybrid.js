@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2018/10/25
+ * @date: 2019/03/14
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -196,7 +196,8 @@ var Hybrid = {
 			return '';
 		}
 
-		var mark = file.indexOf('!!') > -1;
+		//适配 alicdn
+		var mark = /(alicdn.com|tbcdn.cn|\!\!)/.test( file );
 
 		if( mark && !isNaN( size ) ){
 			size = [ size, size ];
@@ -209,7 +210,7 @@ var Hybrid = {
 		}
 	
 		if( mark ){
-			file = file.replace(/_(\d+?)x(\d+?)\.jpg/, '');
+			file = file.replace(/_(\d+?)x(\d+?)\.(jpg|png|webp)/, '');
 			return file + '_' + size + '.jpg';
 		}else{
 			return Hybrid.substr_replace( file, '!'+ size +'.', file.lastIndexOf('.'), 1 );
