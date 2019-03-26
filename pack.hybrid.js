@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/03/14
+ * @date: 2019/03/26
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -31,6 +31,9 @@ var Hybrid = {
 
 		//谷歌统计ID
 		google : '',
+		
+		//公共代理服务
+		proxy : '/proxy/',
 
 		//附件目录
 		attach : '/attach/',
@@ -216,6 +219,18 @@ var Hybrid = {
 			return Hybrid.substr_replace( file, '!'+ size +'.', file.lastIndexOf('.'), 1 );
 		}
 	
+	},
+	
+	/*
+	* @desc	返回图片的代理地址
+	* @return {String} 图片地址
+	*/
+	proxy : function( file ){	
+		if( /(imgextra|qpic|cnblogs)/.test( file ) && Hybrid.config.proxy ){
+			return file.replace( /^(http:|https:)?\/\//ig, Hybrid.config.proxy );
+		}else{
+			return file;
+		}	
 	},
 
 	/*
@@ -1247,6 +1262,15 @@ var Hybrid = {
 					resized: function( field, sized ){
 						return Hybrid.thumb( field, sized );
 					},
+					
+					/*
+					* @desc	返回图片代理地址
+					* @param {String} field 图片地址
+					* @return {String} 新地址
+					*/
+					proxy: function( field ){
+						return Hybrid.proxy( field );
+					},
 
 					/*
 					* @desc	商品详情链接
@@ -1644,14 +1668,14 @@ var Hybrid = {
 			var msg = {};
 
 			//客户端环境
-			msg.UserAgent = window.navigator.userAgent;
+			//msg.UserAgent = window.navigator.userAgent;
 
 			//详细错误信息
 			msg.Message = message;
 			file ? msg.File = file : '';
 			line ? msg.Line = line : '';
 			cols ? msg.Cols = cols : '';
-			msg.Page = window.location.href;
+			//msg.Page = window.location.href;
 
 			var s = [];
 
