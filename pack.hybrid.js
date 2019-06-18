@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/03/26
+ * @date: 2019/05/17
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -308,7 +308,19 @@ var Hybrid = {
 				var state = history.state;
 				func && func( state );
 			});
+		},		
+		
+		/*
+		* @desc	返回document的可见性
+		*/
+		visibility : function(){		 
+			 if( "visibilityState" in document ){
+				return document.visibilityState;
+			 }else{
+				return null;
+			 }
 		}
+		
 	},
 	
 
