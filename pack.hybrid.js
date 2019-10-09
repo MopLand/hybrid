@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/05/17
+ * @date: 2019/10/09
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -497,7 +497,15 @@ var Hybrid = {
 	/*
 	* @desc	表单元素初始化
 	*/
-	Initial : function(){
+	Initial : function( once ){
+	
+		//自动填充标题，为数组面包屑时有效
+		var dc = Hybrid.config.docname;
+		if( once && R.Validate.Array( dc ) && dc.length ){
+			document.title = dc.reverse().join(' / ');
+		}
+
+		////////////////////////
 	
 		//表单元素初始化
 		if( typeof URLSearchParams == 'function' ){
@@ -1436,7 +1444,7 @@ var Hybrid = {
 				mounted : function(){
 
 					//表单填充
-					Hybrid.Initial();
+					//Hybrid.Initial();
 				}
 
 			});
@@ -1721,7 +1729,7 @@ var Hybrid = {
 		//////////////////
 
 		//表单填充
-		Hybrid.Initial();
+		Hybrid.Initial( doc );
 
 		//Ajax上传，仅上传图片
 		Hybrid.Magick();
