@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/10/09
+ * @date: 2019/10/14
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -1444,7 +1444,7 @@ var Hybrid = {
 				mounted : function(){
 
 					//表单填充
-					//Hybrid.Initial();
+					Hybrid.Initial();
 				}
 
 			});
