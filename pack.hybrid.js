@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/10/14
+ * @date: 2019/10/16
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -1493,6 +1493,9 @@ var Hybrid = {
 				//是否启用数据填充
 				var padding	= this.getAttribute('padding') == 'true';
 
+				//是否使用原始数据
+				var rawdata	= this.getAttribute('rawdata') == 'true';
+
 				//////////////////
 
 				//数据请求函数
@@ -1549,45 +1552,54 @@ var Hybrid = {
 					R.jsonp( Hybrid.AjaxUrl( source ), opt, function( data ){
 
 						App.loading = false;
-
-						//数据格式兼容
-						if( typeof data['status'] == 'undefined' ){
-							data['status'] = data['return'];
-						}
 						
-						//处理通用数据
-						Hybrid.Request.done( data, self );
+						//使用原始数据
+						if( rawdata ){
+						
+							Hybrid.variate( flag, App.object, data, padding );
 
-						//处理特殊数据
-						if( data['status'] >= 0 && data['result'] ){
+						}else{
 
-							//更新数据
-							Hybrid.variate( flag, App.object, data['result'], padding );
-
-							//更新标题
-							Hybrid.State.title( flag, data['result'] );
-
-							//滚动视图，更新下一页链接
-							if( paging && listen && Object.keys( data['result'] ).length ){
-
-								//滚动视图，非填充时有效
-								e && !padding && self.scrollIntoView( true );
-
-								//页码数据
-								App.current = data['paging'];
-								App.numbers = pg( data );
-
-								//记录到历史
-								history && e && Hybrid.State.push({ 'reload' : true }, document.title + ' 第'+ App.current +'页', source);
-
+							//数据格式兼容
+							if( typeof data['status'] == 'undefined' ){
+								data['status'] = data['return'];
 							}
-							
-							//触发事件
-							window.setTimeout( function(){
-								R( window ).event('scroll');
-							}, 50 );							
-							
-						}
+						
+							//处理通用数据
+							Hybrid.Request.done( data, self );
+
+							//处理特殊数据
+							if( data['status'] >= 0 && data['result'] ){
+
+								//更新数据
+								Hybrid.variate( flag, App.object, data['result'], padding );
+
+								//更新标题
+								Hybrid.State.title( flag, data['result'] );
+
+								//滚动视图，更新下一页链接
+								if( paging && listen && Object.keys( data['result'] ).length ){
+
+									//滚动视图，非填充时有效
+									e && !padding && self.scrollIntoView( true );
+
+									//页码数据
+									App.current = data['paging'];
+									App.numbers = pg( data );
+
+									//记录到历史
+									history && e && Hybrid.State.push({ 'reload' : true }, document.title + ' 第'+ App.current +'页', source);
+
+								}
+								
+								//触发事件
+								window.setTimeout( function(){
+									R( window ).event('scroll');
+								}, 50 );
+								
+							}
+
+						}						
 
 					});
 				};
