@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/10/16
+ * @date: 2019/11/11
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -1373,7 +1373,7 @@ var Hybrid = {
 					*/
 					qrcode: function( data ){
 						if( data ){
-							return 'http://pan.baidu.com/share/qrcode?w=300&h=300&url=' + encodeURIComponent( data );
+							return 'https://api.qrserver.com/v1/create-qr-code/?data=' + encodeURIComponent( data );
 						}						
 					},
 					
