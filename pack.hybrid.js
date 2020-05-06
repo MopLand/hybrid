@@ -1,13 +1,18 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2019/11/11
+ * @date: 2020/05/06
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
  * @constructor
  */
 var Hybrid = {
+
+	/**
+	* @desc  运行片段
+	*/
+	clips : [],
 
 	/**
 	* @desc  默认配置
@@ -122,6 +127,22 @@ var Hybrid = {
 	*/
 	strpad : function (width, string, padding) {
 		return (width <= string.length) ? string : Hybrid.strpad(width, padding + string, padding);
+	},
+
+	/**
+	* @desc  获取毫秒时间戳
+	* @param {Boolean}  get_as_float	是否返回浮点数
+	* @return {String} 新字符串
+	*/
+	microtime : function (get_as_float) {
+		// http://jsphp.co/jsphp/fn/view/microtime
+		// +   original by: Paulo Freitas
+		// *     example 1: timeStamp = microtime(true);
+		// *     results 1: timeStamp > 1000000000 && timeStamp < 2000000000
+		var now = new Date().getTime() / 1000;
+		var s = parseInt(now, 10);
+	
+		return (get_as_float) ? now : (Math.round((now - s) * 1000) / 1000) + ' ' + s;
 	},
 
 	/**
@@ -709,6 +730,11 @@ var Hybrid = {
 			for( var $idx = 0; $idx < $parts.length; $idx ++ ){
 	
 				var $part = $parts[ $idx ];
+				
+				//跳过非文本内容
+				if( typeof $part != 'string' ){
+					continue;
+				}
 			
 				//处理指定的协议头
 				if( $matche = $part.match( /^(http|https):/ ) ){
@@ -719,7 +745,7 @@ var Hybrid = {
 				}
 				
 				//处理自适应协议头
-				if( $matche = $part.match( /^auto:/ ) ){
+				if( $matche = $part.match( /^auto:/ ) ){   
 					$scheme = $change = location.protocol + '//';
 					$parts.splice( $idx, 1 );
 					$idx--;
@@ -1683,45 +1709,75 @@ var Hybrid = {
 	},
 
 	/**
-	* @desc  JS 异常消息收集
+	* @desc 清空或暂存上下文数据
+	* @param string		名称
+	* @param mixed		数据
+	* @return void
 	*/
-	OnError : function(){
+	Context : function( name, data ){
 
-		if( !Hybrid.config.jserror ) return;
+		if( name ){
 
-		//上报JS错误
-		window.onerror = function( message, file, line, cols, error ) {
+			args = arguments;
+			size = args.length;
 
-			//忽略部分错误
-			if( message == 'Script error.' ){
-				return;
+			for( var i = 0; i < size; i+=2 ){
+				Hybrid.clips.push( { 'time' : Hybrid.microtime(), 'name' : args[ i ], 'data' : args[ i + 1 ] } );
 			}
 			
-			var msg = {};
+		}else{
+			Hybrid.clips = [];
+		}	
 
-			//客户端环境
-			//msg.UserAgent = window.navigator.userAgent;
+	},
+	
+	/**
+	* @desc  JS 日志上报程序
+	*/
+	Report : function( message, source, lineno, colno, error ){
 
-			//详细错误信息
-			msg.Message = message;
-			file ? msg.File = file : '';
-			line ? msg.Line = line : '';
-			cols ? msg.Cols = cols : '';
-			//msg.Page = window.location.href;
+		if( !Hybrid.config.jserror ){
+			console.log('Hybrid.config.jserror is invalid');
+			return;
+		}
+	
+		//忽略部分错误
+		if( message == 'Script error.' ){
+			return;
+		}
+		
+		var msg = {};
 
-			var s = [];
+		//客户端环境
+		//msg.UserAgent = window.navigator.userAgent;
+		//msg.Page = window.location.href;
 
-			//将信息转换成参数
-			for(var key in msg){
-				s.push(key + '=' + encodeURIComponent(msg[key]));
-			}
-			s = s.join('&');
+		//详细错误信息
+		msg.detail = message;
+		source ? msg.source = source : '';
+		lineno ? msg.lineno = lineno : '';
+		colno ? msg.colno = colno : '';
+		error ? msg.error = error : '';
+		msg.domain = location.host;
 
-			//发送错误信息
-			new Image().src = Hybrid.config.jserror + '?' + s;
-			
-		};
+		/*
+		var s = [];
 
+		//将信息转换成参数
+		for(var key in msg){
+			s.push(key + '=' + encodeURIComponent(msg[key]));
+		}
+		s = s.join('&');
+		*/
+
+		var arg = Hybrid.http_build_query( { 'message' : JSON.stringify( msg ), 'context' : JSON.stringify( Hybrid.clips ) } );
+
+		//发送错误信息
+		new Image().src = Hybrid.config.jserror + '?' + arg;
+
+		//清空上下文
+		Hybrid.Context();
+	
 	},
 
 	////////////////////
@@ -1740,6 +1796,9 @@ var Hybrid = {
 
 		//////////////////
 
+		//错误上报
+		win.onerror = Hybrid.Report;
+
 		//表单填充
 		Hybrid.Initial( doc );
 
@@ -1751,9 +1810,6 @@ var Hybrid = {
 
 		//返回顶部
 		Hybrid.Scroll();
-		
-		//异常处理
-		Hybrid.OnError();
 
 		//复制功能
 		Hybrid.Clipboard();
