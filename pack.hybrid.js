@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2020/05/06
+ * @date: 2020/05/07
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -1735,22 +1735,19 @@ var Hybrid = {
 	* @desc  JS 日志上报程序
 	*/
 	Report : function( message, source, lineno, colno, error ){
-
-		if( !Hybrid.config.jserror ){
-			console.log('Hybrid.config.jserror is invalid');
-			return;
-		}
 	
 		//忽略部分错误
 		if( message == 'Script error.' ){
 			return;
 		}
-		
-		var msg = {};
 
-		//客户端环境
-		//msg.UserAgent = window.navigator.userAgent;
-		//msg.Page = window.location.href;
+		if( !Hybrid.config.jserror ){
+			console.log('Hybrid.config.jserror is invalid');
+			return;
+		}
+		
+		var src = ( source || lineno || colno ) ? 'error' : 'report';
+		var msg = {};
 
 		//详细错误信息
 		msg.detail = message;
@@ -1760,17 +1757,7 @@ var Hybrid = {
 		error ? msg.error = error : '';
 		msg.domain = location.host;
 
-		/*
-		var s = [];
-
-		//将信息转换成参数
-		for(var key in msg){
-			s.push(key + '=' + encodeURIComponent(msg[key]));
-		}
-		s = s.join('&');
-		*/
-
-		var arg = Hybrid.http_build_query( { 'message' : JSON.stringify( msg ), 'context' : JSON.stringify( Hybrid.clips ) } );
+		var arg = Hybrid.http_build_query( { 'sourced' : src, 'message' : JSON.stringify( msg ), 'context' : JSON.stringify( Hybrid.clips ) } );
 
 		//发送错误信息
 		new Image().src = Hybrid.config.jserror + '?' + arg;
