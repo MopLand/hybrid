@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2020/05/07
+ * @date: 2020/09/23
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -675,22 +675,35 @@ var Hybrid = {
 	RichEditor: function(){
 
 		var qs = 'textarea[editor]';
+		var raw = {
+			resizeType: 1,
+			cssPath: Hybrid.config.public + 'bootstrap/css/bootstrap.min.css',
+			items: ['source', '|', 'undo', 'redo', '|', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'table', 'hr', 'insertorderedlist', 'insertunorderedlist', '|', 'emoticons', 'image','multiimage', 'insertfile', 'link', 'unlink', '|', 'fullscreen'],
+			uploadJson: Hybrid.config.upload,
+			extraFileUploadParams: { 'model' : 'editor', 'token': Hybrid.config.token },
+			filePostName: 'image',
+			formatUploadUrl: false
+		};
 
 		R(qs).size() && R.script( Hybrid.config.public + 'editor/kindeditor.js?v=' + Hybrid.config.build, function(){
 
 			R.script( Hybrid.config.public + 'editor/lang/zh_CN.js', function(){
 
-				KindEditor.ready(function(K) {
-					Hybrid.Editor = K.create( qs, {
-						resizeType: 1,
-						cssPath: Hybrid.config.public + 'bootstrap/css/bootstrap.min.css',
-						items: ['source', '|', 'undo', 'redo', '|', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright','hr', 'insertorderedlist', 'insertunorderedlist', '|', 'emoticons', 'image','multiimage', 'link'],
-						uploadJson: Hybrid.config.upload,
-						extraFileUploadParams: { 'model' : 'editor', 'token': Hybrid.config.token },
-						filePostName: 'image',
-						formatUploadUrl: false
-					});
-				});
+				//KindEditor.ready(function(K) {
+
+					R( qs ).each( function(){
+						
+						var opt = raw;
+						if( set = this.getAttribute('editor') ){
+							opt = Hybrid.merge( opt, JSON.parse( set ) );
+						}
+
+						Hybrid.config.debug && console.log( opt );
+						Hybrid.Editor = KindEditor.create( this, opt );
+
+					} );
+
+				//});
 
 			});
 
@@ -1151,6 +1164,12 @@ var Hybrid = {
 					R('button[type=submit]',form).enabled();
 
 				};
+				
+				ajax.onError = function(){
+					//启用按钮
+					R('button[type=submit]',form).enabled();				
+				};
+				
 				ajax.send();
 
 			};
