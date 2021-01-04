@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2020/09/23
+ * @date: 2020/12/25
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -1082,17 +1082,9 @@ var Hybrid = {
 		*/
 		ajax : function( node, indx ){
 
+			//预验证
+			var ret = Hybrid.Request.check( node );
 			var url = ( node.getAttribute('data-href') || node.getAttribute('href') );
-			var time = ( node.getAttribute('data-duration') || 3 );
-
-			if( node.getAttribute('data-confirm') && !confirm( node.getAttribute('data-confirm') )){
-				return;
-			}
-
-			if( node.getAttribute('data-message') ){
-				R.toast( 'default', node.getAttribute('data-message'), {'time':time, 'unique':'toast'} );
-				return;
-			}
 
 			//构造URL
 			if( /(input|textarea)/i.test( node.tagName ) ){
@@ -1106,10 +1098,47 @@ var Hybrid = {
 				opt = {};
 			}
 
-			R.jsonp( Hybrid.AjaxUrl( url ), opt, function( data ){
+			ret && R.jsonp( Hybrid.AjaxUrl( url ), opt, function( data ){
 				Hybrid.Request.done( data, node );
 			} );
 
+		},
+		
+		/*
+		* @desc	处理消息验证
+		* @param {Element} elem	元素
+		* @return boolean
+		*/
+		check : function( elem ){
+
+			//消息时长
+			var time = ( elem.getAttribute('data-duration') || 3 );
+
+			if( elem.getAttribute('data-confirm') && !confirm( elem.getAttribute('data-confirm') )){
+				return false;
+			}
+
+			if( elem.getAttribute('data-message') ){
+				R.toast( 'default', elem.getAttribute('data-message'), {'time':time, 'unique':'toast'} );
+				return false;
+			}
+
+			//表单验证
+			if( elem.tagName == 'FORM' ){
+
+				//验证表单有效
+				var data = R.Form( elem, true ).Validate( function( msg ){				
+					R.toast( 'invalid', msg, { 'time':time, 'unique':'toast' } );
+				});
+
+				elem.setAttribute('submit','submit');
+
+				return data;
+
+			}
+
+			return true;
+		
 		},
 
 		/*
@@ -1118,17 +1147,8 @@ var Hybrid = {
 		*/
 		submit : function( form ){
 
-			//默认消息时长
-			var time = ( form.getAttribute('data-duration') || 3 );
-
-			//验证表单有效
-			var result = R.Form( form, true ).Validate( function(msg){				
-				R.toast( 'invalid', msg, { 'time':time, 'unique':'toast' } );
-			});
-
-			form.setAttribute('submit','submit');
-
-			/////////////////
+			//预验证
+			var ret = Hybrid.Request.check( form );
 
 			var func = function( form ){
 
@@ -1176,7 +1196,7 @@ var Hybrid = {
 
 			/////////////////
 
-			result && func( form );
+			ret && func( form );
 
 		}
 
