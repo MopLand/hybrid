@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2020/12/25
+ * @date: 2021/04/14
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -69,12 +69,15 @@ var Hybrid = {
 
 		//模块配置
 		modules : {},
+
+		//页面水印特征
+		imprint : '',
 		
 		//短网址生成接口	
-		shorten : '/fn/tinyurl',
+		shorten : '/fx/tinyurl',
 		
 		//错误消息收集接口
-		jserror : '/fn/jserror'
+		jserror : '/fx/jserror'
 		
 	},
 
@@ -1927,6 +1930,11 @@ var Hybrid = {
 			R.assets( '//cdn.staticfile.org/vConsole/3.2.0/vconsole.min.js', function(){
 				var vc = new VConsole();
 			} );
+		}
+		
+		//页面水印
+		if( bg = Hybrid.config.imprint ){
+			doc.body.setAttribute('style', 'background-image: url(\''+ bg +'\');');
 		}
 
 		//阿里妈妈，淘点金PID
