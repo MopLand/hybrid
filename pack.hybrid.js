@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2021/04/14
+ * @date: 2021/06/07
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -537,7 +537,7 @@ var Hybrid = {
 			var fn = new Function(
 				'var usp = new URLSearchParams( location.search );'+
 				'for(var k of usp.entries()) {'+
-				'	R(\'*[name="\'+ k[0] +\'"]\').value( k[1] );'+
+				'	R(\'*[name="\'+ k[0] +\'"]:not([readonly])\').value( k[1] );'+
 				'};'
 			);
 			fn();
@@ -655,6 +655,7 @@ var Hybrid = {
 		R(qs).size() && R.script( Hybrid.config.public + 'js/pack.clipboard.js?v=' + Hybrid.config.build, function(){
 
 			var clipboard = new Clipboard( qs );
+			
 			clipboard.on('success', function (e) {
 				console.info('Action:', e.action);
 				console.info('Text:', e.text);
@@ -1263,25 +1264,25 @@ var Hybrid = {
 				//数据对象
 				data: {
 					//当前页码
-					current: 1,
+					_current: 1,
 					
 					//分页数量
-					pagenum: 1,
+					_pagenum: 1,
 					
 					//是否加载完成
-					loading: false,
+					_loading: false,
 					
 					//分页页码数据
-					numbers: [],
+					_numbers: [],
 					
 					//变量数据
-					object: {},
+					//object: {},
 					
 					//可选参数
-					option: Hybrid.config.option,
+					//option: Hybrid.config.option,
 					
 					//URL参数
-					params: Hybrid.ReadUrl()
+					//params: Hybrid.ReadUrl()
 				},
 
 				//注意：Vue 2.x 中，过滤器只能在 {{mustache}} 绑定和 v-bind 表达式（从 2.1.0 开始支持）中使用
@@ -1383,7 +1384,7 @@ var Hybrid = {
 					* @return {String} 新内容
 					*/
 					paging: function( num ){
-						this.current = num;
+						this._current = num;
 					},
 
 					/*
@@ -1490,19 +1491,19 @@ var Hybrid = {
 						props: ['prev','next','nums','numbers','current','pagenum'],
 						
 						// 页码按钮
-						template: '<div><a class="prev" v-if="prev" v-on:click="paging(-1)" v-bind:disabled="this.current == 1">上一页</a><a class="nums" v-for="n in numbers" v-if="nums" v-on:click="paging(n, true)" v-bind:class="{ active : current == n }">{{n}}</a><a class="next" v-if="next" v-on:click="paging(1)" v-bind:disabled="this.current == this.pagenum">下一页</a></div>',
+						template: '<div><a class="prev" v-if="prev" v-on:click="paging(-1)" v-bind:disabled="this._current == 1">上一页</a><a class="nums" v-for="n in numbers" v-if="nums" v-on:click="paging(n, true)" v-bind:class="{ active : current == n }">{{n}}</a><a class="next" v-if="next" v-on:click="paging(1)" v-bind:disabled="this._current == this._pagenum">下一页</a></div>',
 						
 						// 定义方法
 						methods: {
 							paging: function ( num, set ) {
 								if( set ){
-									this.current = num;
+									this._current = num;
 								}else{
-									this.current += num;
+									this._current += num;
 								}
-								if( this.current <= 0 ) this.current = 1;
-								if( this.current >= this.pagenum ) this.current = this.pagenum;
-								this.$emit('paging', this.current);
+								if( this._current <= 0 ) this._current = 1;
+								if( this._current >= this._pagenum ) this._current = this._pagenum;
+								this.$emit('paging', this._current);
 							}
 						}
 					}
@@ -1593,14 +1594,14 @@ var Hybrid = {
 					if( e && padding ) {
 
 						//已经到最后一页，或还在加载中
-						if( App.current == App.pagenum || App.loading ){
+						if( App._current == App._pagenum || App._loading ){
 							return;
 						}
 
 						//窗口滚动到底部
 						var top = document.documentElement.scrollTop || document.body.scrollTop;
 						if( (top + document.documentElement.clientHeight + 10) >= document.documentElement.scrollHeight ){
-							App.current += 1;
+							App._current += 1;
 						}else{
 							return;
 						}
@@ -1613,18 +1614,18 @@ var Hybrid = {
 						if( source.indexOf( suffix ) == -1 ){
 							source += ( source.indexOf('?') == -1 ? '?' : '&' ) + suffix;
 						}					
-						App.loading = true;
+						App._loading = true;
 					}
 
 					//生成 JSONP 请求
 					R.jsonp( Hybrid.AjaxUrl( source ), opt, function( data ){
 
-						App.loading = false;
+						App._loading = false;
 						
 						//使用原始数据
 						if( rawdata ){
 						
-							Hybrid.variate( flag, App.object, data, padding );
+							Hybrid.variate( flag, App, data, padding );
 
 						}else{
 
@@ -1640,7 +1641,7 @@ var Hybrid = {
 							if( data['status'] >= 0 && data['result'] ){
 
 								//更新数据
-								Hybrid.variate( flag, App.object, data['result'], padding );
+								Hybrid.variate( flag, App, data['result'], padding );
 
 								//更新标题
 								Hybrid.State.title( flag, data['result'] );
@@ -1652,11 +1653,11 @@ var Hybrid = {
 									e && !padding && self.scrollIntoView( true );
 
 									//页码数据
-									App.current = data['paging'];
-									App.numbers = pg( data );
+									App._current = data['paging'];
+									App._numbers = pg( data );
 
 									//记录到历史
-									history && e && Hybrid.State.push({ 'reload' : true }, document.title + ' 第'+ App.current +'页', source);
+									history && e && Hybrid.State.push({ 'reload' : true }, document.title + ' 第'+ App._current +'页', source);
 
 								}
 								
@@ -1683,7 +1684,7 @@ var Hybrid = {
 
 					var sized = 10;
 
-					App.pagenum = count;
+					App._pagenum = count;
 
 					//console.log( 'count', count, 'sized', sized, 'group', group );
 
@@ -1778,7 +1779,7 @@ var Hybrid = {
 	*/
 	Report : function( message, source, lineno, colno, error ){
 	
-		//忽略部分错误
+		//忽略部分错误，增加 crossorigin 可解决
 		if( message == 'Script error.' ){
 			return;
 		}
