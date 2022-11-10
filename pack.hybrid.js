@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2021/06/07
+ * @date: 2022/10/20
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -655,7 +655,7 @@ var Hybrid = {
 		R(qs).size() && R.script( Hybrid.config.public + 'js/pack.clipboard.js?v=' + Hybrid.config.build, function(){
 
 			var clipboard = new Clipboard( qs );
-			
+
 			clipboard.on('success', function (e) {
 				console.info('Action:', e.action);
 				console.info('Text:', e.text);
@@ -1003,6 +1003,11 @@ var Hybrid = {
 					node.reset();
 				}
 
+				//重置表单 crsf 验证
+				if( data['token'] && node.tagName == 'FORM' ){
+					R('*[name=crsf]', node).value( data['token'] );
+				}
+
 				/////////////////
 
 				//使用自定义消息时长
@@ -1047,7 +1052,7 @@ var Hybrid = {
 
 			//刷新验证码
 			if( data['captcha'] ){
-				R('img[rel=captcha]').event('click');
+				R('img[rel=captcha]', node).event('click');
 			}
 
 		},
@@ -1253,6 +1258,14 @@ var Hybrid = {
 			//开启调试
 			if( Hybrid.config.debug ) Vue.config.devtools = true;
 
+			////////////////////
+
+			var flags = [];
+
+			R(qs).each(function( idx ){	
+				flags.push( this.getAttribute('flag') );
+			});
+
 			var App = Hybrid.App = new Vue({
 
 				//绑定元素
@@ -1262,27 +1275,12 @@ var Hybrid = {
 				mixins: [ Hybrid.config.extend ],
 
 				//数据对象
-				data: {
-					//当前页码
-					_current: 1,
-					
-					//分页数量
-					_pagenum: 1,
-					
-					//是否加载完成
-					_loading: false,
-					
-					//分页页码数据
-					_numbers: [],
-					
-					//变量数据
-					//object: {},
-					
-					//可选参数
-					//option: Hybrid.config.option,
-					
-					//URL参数
-					//params: Hybrid.ReadUrl()
+				data: function(){
+					var ret = {}
+					for( var f in flags ){
+						ret[ flags[f] ] = null;
+					}
+					return ret;
 				},
 
 				//注意：Vue 2.x 中，过滤器只能在 {{mustache}} 绑定和 v-bind 表达式（从 2.1.0 开始支持）中使用
@@ -1467,6 +1465,15 @@ var Hybrid = {
 							return JSON.parse( data );
 						}
 					},
+
+					/*
+					* @desc	检测是否存在某个属性
+					* @param {String} flag 索引
+					* @return Boolean
+					*/
+					detect: function( flag ){
+						return flag in this.$data;
+					},
 					
 					/*
 					* @desc URL 生成
@@ -1488,22 +1495,37 @@ var Hybrid = {
 					'paging': {
 					
 						// 声明 props
-						props: ['prev','next','nums','numbers','current','pagenum'],
+						//props: ['prev','next','nums','numbers','current','pagenum'],
+						props: {
+							case  : null,
+							prev : {type: Boolean, default: false},
+							next : {type: Boolean, default: false},
+							nums : {type: Number, default: 0},
+							loading : {type: Boolean, default: false},
+							numbers : {type: Array, default: []},
+							current : {type: Number, default: 1},
+							pagenum : {type: Number, default: 1}
+						},
 						
 						// 页码按钮
-						template: '<div><a class="prev" v-if="prev" v-on:click="paging(-1)" v-bind:disabled="this._current == 1">上一页</a><a class="nums" v-for="n in numbers" v-if="nums" v-on:click="paging(n, true)" v-bind:class="{ active : current == n }">{{n}}</a><a class="next" v-if="next" v-on:click="paging(1)" v-bind:disabled="this._current == this._pagenum">下一页</a></div>',
+						template: '<div><a class="prev" v-if="prev" v-on:click="paging(-1)" v-bind:disabled="this.current == 1">上一页</a><a class="nums" v-for="n in numbers" v-if="nums" v-on:click="paging(n, true)" v-bind:class="{ active : current == n }">{{n}}</a><a class="next" v-if="next" v-on:click="paging(1)" v-bind:disabled="this.current == this.pagenum">下一页</a></div>',
 						
 						// 定义方法
 						methods: {
 							paging: function ( num, set ) {
 								if( set ){
-									this._current = num;
+									this.current = num;
 								}else{
-									this._current += num;
+									this.current += num;
 								}
-								if( this._current <= 0 ) this._current = 1;
-								if( this._current >= this._pagenum ) this._current = this._pagenum;
-								this.$emit('paging', this._current);
+								if( this.current <= 0 ) this.current = 1;
+								if( this.current >= this.pagenum ) this.current = this.pagenum;
+								//this.$emit('paging', this.current);
+							}
+						},
+						mounted() {
+							if( el = this.$el.closest('fragment') ){
+								el.paging = this;
 							}
 						}
 					}
@@ -1539,6 +1561,10 @@ var Hybrid = {
 
 				//数据来源
 				var source	= this.getAttribute('source') || location.href;
+
+				//加载次数
+				self.loaded = 0;
+				self.paging = self.paging || {};
 
 				//////////////////
 
@@ -1582,26 +1608,28 @@ var Hybrid = {
 					
 					//当前分页禁用，仅对DOM元素有效
 					if( e && e.target.tagName && e.target.hasAttribute('disabled') ){
-						return;
+					//	return;
 					}
 
-					//当前页面处于不可见状态
-					if( 'visibilityState' in document && document.visibilityState == 'hidden' ){
+					//当前页面处于不可见状态，忽略初始化
+					if( self.loaded > 0 && 'visibilityState' in document && document.visibilityState == 'hidden' ){
 						return;
+					}else{
+						self.loaded ++;
 					}
 
 					//自动填充数据
 					if( e && padding ) {
 
 						//已经到最后一页，或还在加载中
-						if( App._current == App._pagenum || App._loading ){
+						if( self.paging.current == self.paging.pagenum || self.paging.loading ){
 							return;
 						}
 
 						//窗口滚动到底部
 						var top = document.documentElement.scrollTop || document.body.scrollTop;
 						if( (top + document.documentElement.clientHeight + 10) >= document.documentElement.scrollHeight ){
-							App._current += 1;
+							self.paging.current += 1;
 						}else{
 							return;
 						}
@@ -1609,23 +1637,23 @@ var Hybrid = {
 
 					//事件触发时，更新 URL
 					if( e ){
-						var suffix = 'page=' + App.current;
+						var suffix = 'page=' + self.paging.current;
 						source = source.replace( /page=(\d*)/ig, suffix );
 						if( source.indexOf( suffix ) == -1 ){
 							source += ( source.indexOf('?') == -1 ? '?' : '&' ) + suffix;
 						}					
-						App._loading = true;
+						self.paging.loading = true;
 					}
 
 					//生成 JSONP 请求
 					R.jsonp( Hybrid.AjaxUrl( source ), opt, function( data ){
 
-						App._loading = false;
+						self.paging.loading = false;
 						
 						//使用原始数据
 						if( rawdata ){
 						
-							Hybrid.variate( flag, App, data, padding );
+							Hybrid.variate( flag, App.$data, data, padding );
 
 						}else{
 
@@ -1641,7 +1669,7 @@ var Hybrid = {
 							if( data['status'] >= 0 && data['result'] ){
 
 								//更新数据
-								Hybrid.variate( flag, App, data['result'], padding );
+								Hybrid.variate( flag, App.$data, data['result'], padding );
 
 								//更新标题
 								Hybrid.State.title( flag, data['result'] );
@@ -1653,11 +1681,11 @@ var Hybrid = {
 									e && !padding && self.scrollIntoView( true );
 
 									//页码数据
-									App._current = data['paging'];
-									App._numbers = pg( data );
+									self.paging.current = data['paging'];
+									self.paging.numbers = pg( data );
 
 									//记录到历史
-									history && e && Hybrid.State.push({ 'reload' : true }, document.title + ' 第'+ App._current +'页', source);
+									history && e && Hybrid.State.push({ 'reload' : true }, document.title + ' 第'+ self.paging.current +'页', source);
 
 								}
 								
@@ -1684,7 +1712,7 @@ var Hybrid = {
 
 					var sized = 10;
 
-					App._pagenum = count;
+					self.paging.pagenum = count;
 
 					//console.log( 'count', count, 'sized', sized, 'group', group );
 
