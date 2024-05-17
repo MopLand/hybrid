@@ -125,7 +125,7 @@
 					if( pos > -1 ){
 						var idx = key.substr( 12 );
 						attrs[ idx ] = this.attributes[i].value;
-					}				
+					}
 				}
 
 				/////////////////////////////
@@ -140,7 +140,7 @@
 
 					attrs['pics'] = [];
 
-					var pics = document.querySelectorAll('[data-typhon=picture]');				
+					var pics = document.querySelectorAll('[data-typhon=picture]');
 
 					for( var i = 0; i < pics.length; i++ ){
 						attrs['pics'].push( pics[i].href );
@@ -158,7 +158,7 @@
 				
 				//返回结果			
 				if( result ){
-					console.log( 'Result', result );			
+					console.log( 'Result', result );
 				}
 
 			}else{

@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Typhon</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
+  <script src="//public.baohe.rexcdn.com/js/ray.js"></script>
+  <script src="//public.baohe.rexcdn.com/vue/vue.js"></script>
+  <script src="pack.hybrid.js"></script>
+</head>
+<body>
+
+<div class="container" id="app">
+
+	<h1 class="display-4 text-muted">
+		Typhon/1.0 Dev
+	</h1>
+
+	<hr class="py-1 text-secondary" />
+
+	<div class="table-responsive">
+
+		<h3>App 交互</h3>
+		
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-typhon="toast" data-typhon-message="Hello">App 原生 Toast</a>
+			<hr />
+			<code>App.toast( attrs : { message : 'Hello' } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-typhon="confirm" data-typhon-confirm="Hello">App 原生 Confirm</a>
+			<hr />
+			<code>App.confirm( attrs : { message : 'Hello' } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-typhon="prompt" data-typhon-prompt="Hello">App 原生 Prompt</a>
+			<hr />
+			<code>App.prompt( attrs : { message : 'Hello' } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-typhon="storage" data-typhon-index="example.key" data-typhon-value="haha!">写入 App 数据</a>
+			<hr />
+			<code>App.storage( attrs : { index : 'test', value : 'haha!' } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-typhon="storage" data-typhon-index="example.key">读取 App 数据</a>
+			<hr />
+			<code>App.storage( attrs : { index : 'test' } );</code>
+		</div>
+
+		<h3>App 窗口处理</h3>
+	
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-type="fff" data-typhon="activity" data-typhon-activity="Browser" data-typhon-extra='{ "a" : "b" }'>打开 App 指定 Activity</a>
+			<hr />
+			<code>App.activity( 'activity', attrs : { } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a class="btn btn-secondary" data-typhon="activity" data-typhon-closed>关闭 App 当前 Activity</a>
+			<hr />
+			<code>App.activity( 'activity', 'turnoff' );</code>
+		</div>
+
+		<h3>App 链接处理</h3>
+		
+		<div class="alert alert-light">
+			<a href="">一般超链接，不做任何处理</a>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link">独立窗口打开超链接</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url' } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link" data-typhon-goback="true">独立窗口打开超链接，有返回按钮</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url', goback: true } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link" data-typhon-turnoff="true">独立窗口打开超链接，有关闭按钮</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url', turnoff: true } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link" data-typhon-closed="true">独立窗口打开超链接，同时关闭当前窗口</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url', closed: true } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link" data-typhon-refresh="true">独立窗口打开超链接，有刷新按钮</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url', refresh: true } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link" data-typhon-copylink="true">独立窗口打开超链接，有复制链接</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url', copylink: true } );</code>
+		</div>
+		
+		<div class="alert alert-light">
+			<a href="" data-typhon="link" data-typhon-sharelink="true">独立窗口打开超链接，有分享链接</a>
+			<hr />
+			<code>App.link( attrs : { href: 'url', sharelink: true } );</code>
+		</div>
+
+		<h3>App 扩展功能</h3>
+		
+		<div class="alert alert-light">
+			<p>文件上传</p>
+			<div><input type="file" name="thumb" model="native" config='{ "model" : "pics" }' class="form-control" /></div>
+		</div>
+		
+		<div class="alert alert-light">
+			<p>图片预览</p>
+			<div>
+				<a href="preview.jpg" data-typhon="picture"><img src="preview.jpg" /></a>
+				<a href="preview.jpg" data-typhon="picture"><img src="preview.jpg" /></a>
+			</div>
+			<hr />
+			<code>App.picture( attrs : { href: 'url', pics: ['preview.jpg', 'preview.jpg'] } );</code>
+		</div>
+		
+	</div>
+
+	<hr class="py-1 text-secondary" />
+
+	<footer>
+		<p class="text-center"><i class="powered">Powered by <a href="http://notes.veryide.com/" target="_blank" title="Powered by DORA">DORA</a></i></p>
+	</footer>
+
+</div>
+
+
+<script src="pack.typhon.js"></script>
+
+
+</body>
+</html>
