@@ -1,7 +1,7 @@
 /*!
  * @name Hybrid
  * @class 整合文件上传，表单提交，Ajax 处理，模板引擎
- * @date: 2022/10/20
+ * @date: 2026/01/04
  * @see http://www.veryide.com/projects/hybrid/
  * @author Lay
  * @copyright VeryIDE
@@ -79,6 +79,47 @@ var Hybrid = {
 		//错误消息收集接口
 		jserror : '/fx/jserror'
 		
+	},
+	
+	/**
+	 * @desc 对象深拷贝
+	 * @param object 对象
+	 * @return object
+	 * Hybrid.clone( { quality : 80, output : 'png' } );
+	 */
+	clone : function(obj) {
+		var ret = Array.isArray(obj) ? [] : {};
+		for (var key in obj) {
+			if (obj.hasOwnProperty(key)) {
+				if (typeof obj[key] === 'object' && obj[key] !== null) {
+					ret[key] = this.clone(obj[key]);   //递归复制
+				} else {
+					ret[key] = obj[key];
+				}
+			}
+		}
+		return ret;
+	}, 
+	
+	/**
+	 * @desc 对象筛选
+	 * @param string 字符串
+	 * @param regexp 正则表达式
+	 * @param integer 索引位置
+	 * @return string
+	 * @link https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/@@matchAll
+	 */
+	match : function(string, regexp, index = -1) {
+		var test = regexp.exec( string );
+		if( test ){
+			if( index > -1 ){
+				return typeof test[index] != 'undefined' ? test[index] : null;
+			}else{
+				return test;
+			}			
+		}else{
+			return null;
+		}
 	},
 
 	/**
@@ -225,6 +266,10 @@ var Hybrid = {
 
 		//适配 alicdn
 		var mark = /(alicdn.com|tbcdn.cn|\!\!)/.test( file );
+		
+		//适配 webp
+		var webp = /(\+\.)/.test( file );
+		var symb = webp ? '+.' : '.';
 
 		if( mark && !isNaN( size ) ){
 			size = [ size, size ];
@@ -240,7 +285,7 @@ var Hybrid = {
 			file = file.replace(/_(\d+?)x(\d+?)\.(jpg|png|webp)/, '');
 			return file + '_' + size + '.jpg';
 		}else{
-			return Hybrid.substr_replace( file, '!'+ size +'.', file.lastIndexOf('.'), 1 );
+			return Hybrid.substr_replace( file, '!'+ size +'.', file.lastIndexOf(symb), webp ? 2 : 1 );
 		}
 	
 	},
@@ -681,7 +726,7 @@ var Hybrid = {
 		var qs = 'textarea[editor]';
 		var raw = {
 			resizeType: 1,
-			cssPath: Hybrid.config.public + 'bootstrap/css/bootstrap.min.css',
+			cssPath: Hybrid.config.public + 'startup/css/bootstrap.min.css',
 			items: ['source', '|', 'undo', 'redo', '|', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'table', 'hr', 'insertorderedlist', 'insertunorderedlist', '|', 'emoticons', 'image','multiimage', 'insertfile', 'link', 'unlink', '|', 'fullscreen'],
 			uploadJson: Hybrid.config.upload,
 			extraFileUploadParams: { 'model' : 'editor', 'token': Hybrid.config.token },
@@ -1529,6 +1574,7 @@ var Hybrid = {
 							}
 						}
 					}
+
 				},
 
 				//装载事件
@@ -1826,9 +1872,17 @@ var Hybrid = {
 		lineno ? msg.lineno = lineno : '';
 		colno ? msg.colno = colno : '';
 		error ? msg.error = error : '';
-		msg.domain = location.host;
+		
+		if( source != location.href ){
+			msg.locale = location.href;
+		}
 
-		var arg = Hybrid.http_build_query( { 'sourced' : src, 'message' : JSON.stringify( msg ), 'context' : JSON.stringify( Hybrid.clips ) } );
+		var arg = Hybrid.http_build_query( { 
+			'event' : src.toUpperCase(),
+			'detail' : JSON.stringify( msg ),
+			'context' : JSON.stringify( Hybrid.clips ),
+			'package': location.host
+		} );
 
 		//发送错误信息
 		new Image().src = Hybrid.config.jserror + '?' + arg;
